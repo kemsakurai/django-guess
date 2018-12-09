@@ -35,5 +35,5 @@ class GuessResult(models.Model):
 
     class Meta:
         unique_together = (
-            ('previous_page_path', 'pagePath'),
+            ('previous_page_path', 'page_path'),
         )
