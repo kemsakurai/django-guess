@@ -37,5 +37,6 @@ setup(
         'pandas>=0.23.4',
         'Google2Pandas>=0.1.1',
         'numpy>=1.13.3',
+        'djangorestframework>=3.7.7'
     ]
 )

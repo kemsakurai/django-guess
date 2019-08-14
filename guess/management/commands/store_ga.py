@@ -5,10 +5,10 @@ import numpy as np
 from django.conf import settings
 from django.db import transaction
 
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-
         record_dicts = self.fetch_ga()
         self.store(record_dicts)
 
@@ -56,10 +56,11 @@ class Command(BaseCommand):
         # previousPagePath ごとの合計を算出
         df_groupby_pagepath = df_excluded_entrance.groupby('previousPagePath').sum()
 
+        rasio_to_evaluate = settings.GUESS_SETTINGS["COMMAND_CONFIG"]['RATIO_TO_EVALUATE']
         # 上位20%のデータのみ抽出する
         import pandas as pd
         df_cutback = df_groupby_pagepath[
-            df_groupby_pagepath['pageviews'] > df_groupby_pagepath.quantile(0.80)["pageviews"]]
+            df_groupby_pagepath['pageviews'] > df_groupby_pagepath.quantile(rasio_to_evaluate)["pageviews"]]
         df_edited = df_excluded_entrance[df_excluded_entrance['previousPagePath'].isin(df_cutback.index.tolist())]
 
         ## 元データに対して処理を行い、最終的なアウトプットへ加工する
@@ -68,8 +69,11 @@ class Command(BaseCommand):
         page_grouped['pageview_percent'] = page_grouped.groupby(level=0).apply(lambda x: 100 * x / float(x.sum()))[
             'pageviews']
         page_grouped = page_grouped.reset_index()
+        lower_limit_transition_probability = settings.GUESS_SETTINGS["COMMAND_CONFIG"][
+            'LOWER_LIMIT_TRANSITION_PROBABILITY']
         page_grouped = page_grouped[
-            (page_grouped['pageview_percent'] >= 10) & ~(page_grouped['previousPagePath'] == page_grouped['pagePath'])]
+            (page_grouped['pageview_percent'] >= lower_limit_transition_probability) & ~(
+                        page_grouped['previousPagePath'] == page_grouped['pagePath'])]
 
         # pandas の編集結果を登録する
         record_dicts = page_grouped.to_dict(orient="records")
