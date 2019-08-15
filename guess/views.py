@@ -22,7 +22,6 @@ class GuessResultList(generics.ListAPIView):
             return Response("page_path is required.", status=status.HTTP_400_BAD_REQUEST)
 
         effective_type = self.kwargs.get('effectivetype')
-        print(effective_type)
         if not effective_type:
             effective_type = '3g'
         percent = GUESS_SETTINGS['PREFETCH_CONFIG'].get(effective_type);
