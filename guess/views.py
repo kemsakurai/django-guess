@@ -20,7 +20,10 @@ class GuessResultList(generics.ListAPIView):
         page_path = self.kwargs.get('pagepath')
         if not page_path:
             return Response("page_path is required.", status=status.HTTP_400_BAD_REQUEST)
-
+        if page_path.find('/') > 0:
+            page_path = '/' + page_path
+        if page_path.rfind('/') > 0:
+            page_path = page_path + '/'
         effective_type = self.kwargs.get('effectivetype')
         if not effective_type:
             effective_type = '3g'
